@@ -1,0 +1,6 @@
+{
+  "execution_horizon": 20,
+  "max_cycles": 50,
+  "max_task_duration_s": 600.0,
+  "browser_disconnect_timeout_s": 5.0
+}

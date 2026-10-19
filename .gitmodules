@@ -1,0 +1,3 @@
+[submodule "robot_control/vendor/daqp"]
+	path = robot_control/vendor/daqp
+	url = https://github.com/darnstrom/daqp.git

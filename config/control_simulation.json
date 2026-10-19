@@ -1,0 +1,48 @@
+{
+  "scope": "simulation_only_not_site_motion_limits",
+  "control_hz": 200,
+  "execution_horizon": 3,
+  "feedback_max_age_s": 0.1,
+  "prediction_max_age_s": 2.5,
+  "rpc_timeout_s": 2.0,
+  "max_lateness_s": 0.01,
+  "max_hold_s": 3.0,
+  "tracking_position_m": 0.02,
+  "tracking_rotation_rad": 0.1,
+  "tracking_gripper": 0.05,
+  "max_position_step_m": 0.01,
+  "max_rotation_step_rad": 0.05,
+  "max_linear_speed_m_s": 0.1,
+  "max_angular_speed_rad_s": 0.5,
+  "max_linear_acceleration_m_s2": 1.0,
+  "max_angular_acceleration_rad_s2": 5.0,
+  "max_gripper_speed_s": 1.0,
+  "workspace_m": {
+    "left": [
+      [
+        0.2,
+        -0.4,
+        0.4
+      ],
+      [
+        0.9,
+        0.4,
+        1.2
+      ]
+    ],
+    "right": [
+      [
+        0.2,
+        -0.6,
+        0.4
+      ],
+      [
+        0.9,
+        0.2,
+        1.2
+      ]
+    ]
+  },
+  "max_gripper_correction": 0.05,
+  "gripper_output_policy": "gripper_saturation_v1"
+}

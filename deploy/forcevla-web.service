@@ -1,0 +1,19 @@
+[Unit]
+Description=ForceVLA inference and robot control web console
+After=network.target forcevla-thor.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/forcevla-web
+ExecStart=%h/forcevla-web/.venv/bin/python -m forcevla_web --config config/local.json
+Environment=PYTHONUNBUFFERED=1
+Environment=MALLOC_ARENA_MAX=2
+Environment=MALLOC_MMAP_THRESHOLD_=131072
+UnsetEnvironment=PYTHONPATH VIRTUAL_ENV
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=25
+KillMode=control-group
+
+[Install]
+WantedBy=default.target

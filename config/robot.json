@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "repository": "/home/user/projects/forcevla-thor-pr68",
+  "runtime": "/home/user/forcevla-runtime-thor",
+  "service": "forcevla-thor.service",
+  "address": "127.0.0.1:50071",
+  "backend": "reference-ordered",
+  "ros_domain_id": 24,
+  "prompt": "Insert the Ethernet cable into the Ethernet port on the end face of the docking station.",
+  "camera_mapping_verified": false,
+  "physical_tcp_verified": false,
+  "wrench_physical_semantics_verified": false,
+  "camera_topic": "/quad_tile/compressed_undistorted",
+  "camera_frame": "quad_undistorted",
+  "topics": {
+    "left_pose": "/tj/info/eef_left",
+    "right_pose": "/tj/info/eef_right",
+    "left_wrench": "/tj/info/wrench_left",
+    "right_wrench": "/tj/info/wrench_right",
+    "gripper": "/info/web_gripper"
+  },
+  "expected_calibration": [
+    [
+      0.0,
+      1.6
+    ],
+    [
+      0.0,
+      1.6
+    ]
+  ],
+  "limits": {
+    "max_source_age_s": 0.5,
+    "max_receipt_age_s": 0.5,
+    "max_skew_s": 0.15,
+    "max_motor_feedback_age_s": 0.2,
+    "max_future_s": 0.02
+  },
+  "expected_parameters": {
+    "/tj/marvin_robot_node": {
+      "robot_type": "pro",
+      "robot_ip": "6.6.7.190",
+      "control_rate": 200,
+      "joint_states_rate": 100,
+      "left_joints": [
+        "Joint1_L",
+        "Joint2_L",
+        "Joint3_L",
+        "Joint4_L",
+        "Joint5_L",
+        "Joint6_L",
+        "Joint7_L"
+      ],
+      "right_joints": [
+        "Joint1_R",
+        "Joint2_R",
+        "Joint3_R",
+        "Joint4_R",
+        "Joint5_R",
+        "Joint6_R",
+        "Joint7_R"
+      ],
+      "left_tool": [
+        0.6,
+        0.0,
+        0.0,
+        50.0,
+        0.004,
+        0.0,
+        0.0,
+        0.004,
+        0.0,
+        0.03
+      ],
+      "right_tool": [
+        0.6,
+        0.0,
+        0.0,
+        50.0,
+        0.004,
+        0.0,
+        0.0,
+        0.004,
+        0.0,
+        0.03
+      ]
+    },
+    "/tj/qp_controller": {
+      "scene_file": "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/mjcf/matrix/m6_696.xml",
+      "ik_tasks_file": "m6_696/ik_tasks.yaml",
+      "control_frequency_hz": 500.0,
+      "ik_request_timeout": 0.5,
+      "publish_joint_cmd": true,
+      "joint_cmd_mux_qp_source_index": 1,
+      "collision_pairs_file": "m6_696/collision_pairs.json",
+      "velocity_limits_file": "m6_696/velocity_limits.json",
+      "posture_cost": 0.5,
+      "damping_cost": 0.2,
+      "kinetic_cost": 0.0001,
+      "qp_damping": 0.1,
+      "collision_minimum_distance": 0.005,
+      "collision_detection_distance": 0.15
+    },
+    "/quad_csi_quickview": {
+      "camera": {
+        "argus_ae_antibanding": 0,
+        "flip_method": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "fps": 30,
+        "input_height": 1984,
+        "input_width": 2560,
+        "sources": {
+          "head_left": "csi://0",
+          "head_right": "csi://1",
+          "wrist_left": "csi://2",
+          "wrist_right": "csi://3"
+        },
+        "type": "auto",
+        "v4l2_io_mode": "auto"
+      },
+      "calibration": {
+        "cx": 1278.0756357403,
+        "cy": 995.0912971747,
+        "enabled": true,
+        "fx": 974.7508164114,
+        "fy": 975.2351776072,
+        "k1": 0.6933816749,
+        "k2": 0.3649263406,
+        "k3": 0.0098392884,
+        "k4": 0.7918527853,
+        "k5": 0.5006976367,
+        "k6": 0.0620797063,
+        "p1": -3.99129e-05,
+        "p2": -5.87533e-05,
+        "undistort_enabled": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "recorder": {
+        "output_width": 1920,
+        "output_height": 1080
+      },
+      "mosaic": {
+        "output_height": 2160,
+        "output_width": 3840
+      },
+      "webrtc": {
+        "output_width": 1920,
+        "output_height": 1488
+      }
+    },
+    "/csi_left_eye": {
+      "source_uri": "csi://0",
+      "flip_method": 2,
+      "width": 2560,
+      "height": 1984,
+      "fps": 30
+    },
+    "/dm_gripper_motor_node": {
+      "Motor1_min_pos": 0.0,
+      "Motor1_max_pos": 1.6,
+      "Motor2_min_pos": 0.0,
+      "Motor2_max_pos": 1.6,
+      "auto_calibrate": false,
+      "left_motor_id": 1,
+      "right_motor_id": 2
+    }
+  },
+  "expected_file_sha256": {
+    "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/urdf/marvin_CCS_matrix.urdf.xacro": "4b2d55ca1aeb22c9d7f047e289633370447e21901f491f0413baff4b1db3fc6f",
+    "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/urdf/M6-S-L-CCS-696-V4.urdf.xacro": "33c7346528785d93efd192a0c6f0707f3844d769e9f3e67cdac782a43058c1d1",
+    "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/urdf/M6-S-R-CCS-696-V4.urdf.xacro": "968967640916f7afabc5fa97afced89e9e00db8a777e01a1beaf76ad3b7780e1",
+    "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/urdf/stand_new.urdf.xacro": "708890b087932b090dea6b5791f8d469daeb0095bcfb20d350f3651b98fd7e44",
+    "/opt/kernelmind/apex/install/marvin_description/share/marvin_description/mjcf/matrix/m6_696.xml": "ae498a0936465c130a948013286fdfa5ad8313f66f92740c6f1f9680d66a6b96",
+    "/opt/kernelmind/apex/install/marvin_teleop/share/marvin_teleop/config/ccs_m6_696.MvKDCfg": "ae56bf8a72abf643410d6e702afa3dba0a20986c14f575c9594ee08c8745a636",
+    "/opt/kernelmind/apex/install/marvin_teleop/share/marvin_teleop/config/robot_param_m6_696.yaml": "675bfb928c1e6ec6716edb903cb7a93acc68438d8c116167791b6823d4cb830b",
+    "/home/user/Desktop/TJ_FX_ROBOT_CONTRL_SDK-master/SDK_PYTHON/fx_kine.py": "690d26826c7b4112e3c9b088d2e21aac3154f05e6a32a368503ecd42901d048d",
+    "/home/user/Desktop/TJ_FX_ROBOT_CONTRL_SDK-master/SDK_PYTHON/libKine.so": "7f03a33964123d2b37d249a51cbdb748c54f5445021ac10e128b27f349dc4d83",
+    "/opt/kernelmind/apex/install/marvin_qp_controller/share/marvin_qp_controller/config/m6_696/ik_tasks.yaml": "a47f68c16dbb4f00b5dbd0d6bc091dba3ea2bb9ec8e3a5287810c18401322afd",
+    "/home/user/projects/letools/scripts/convert_bimanual_tcp.py": "0ab1dc4a7bdd348473a0e49a5f672b0cbb3a311f6ec6da2907fdace8ba8144cf",
+    "/opt/kernelmind/apex/install/marvin_qp_controller/share/marvin_qp_controller/config/m6_696/collision_pairs.json": "340f04d50520f2d9f809d8c770eff65caddf4fae300f5e09a5df950c91430c65",
+    "/opt/kernelmind/apex/install/marvin_qp_controller/share/marvin_qp_controller/config/m6_696/velocity_limits.json": "f2659d7ba8da593ad902af11ff7edd110c39b2bad833df66674d11f3807559bf"
+  },
+  "parameter_baseline": "2026-10-13 readonly audit; configuration consistency only, not physical calibration",
+  "http_status": {
+    "robot": "http://127.0.0.1:8080/api/v1/robot/status",
+    "gripper": "http://127.0.0.1:8080/api/v1/gripper/web/status"
+  },
+  "camera_decoded_shape": [
+    1488,
+    1920,
+    3
+  ],
+  "camera_geometry_policy": "full-quad-area-to1920x1080-then-training-tiles",
+  "camera_transport_equivalence_verified": false,
+  "operator_confirmation": {
+    "recorded_unix_ns": 1791963318218942254,
+    "task_same_as_training": true,
+    "initial_setup_same_as_training": true,
+    "hardware_unchanged_since_training": true,
+    "source": "user conversation: 任务与初始摆放相同，硬件没有变化",
+    "scope": "operator statement, not an independent measurement of TCP, force frame, exposure synchronization or controller stop behavior"
+  }
+}

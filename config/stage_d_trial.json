@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "profile": "first_noncontact_prefix_candidate_v1",
+  "scope": "Conservative engineering budgets for preparation and isolated tests; not a hardware motion approval",
+  "prefix_steps": 1,
+  "max_joint_displacement_rad": 0.01,
+  "max_joint_speed_rad_s": 0.1,
+  "max_joint_acceleration_rad_s2": 1.0,
+  "max_tcp_displacement_m": 0.005,
+  "max_tcp_rotation_rad": 0.03,
+  "max_gripper_displacement": 0.02,
+  "max_gripper_speed_per_s": 0.03,
+  "max_prediction_age_s": 2.5,
+  "max_lateness_s": 0.002,
+  "max_feedback_seed_error_rad": 0.002,
+  "max_initial_speed_rad_s": 0.02,
+  "require_b_live_hold_acceptance": true,
+  "site_trial_limits_accepted": false,
+  "independent_stop_path_verified": false
+}

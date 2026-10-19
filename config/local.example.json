@@ -1,0 +1,57 @@
+{
+  "source": "live",
+  "host": "0.0.0.0",
+  "port": 8096,
+  "allowed_hosts": [
+    "127.0.0.1",
+    "localhost"
+  ],
+  "policy_repo": "/path/to/forcevla-repository",
+  "phyai_repository": "/path/to/phyai-repository",
+  "python": "/path/to/model-environment/bin/python",
+  "model_load_timeout_s": 900,
+  "model_registry": [],
+  "model_address": "127.0.0.1:50071",
+  "manifest_path": "/path/to/forcevla-runtime/artifacts/deployed-runtime.json",
+  "ros_setup": "/opt/kernelmind/apex/install/setup.bash",
+  "ros_domain_id": 24,
+  "image_topic": "/quad_tile/compressed_undistorted",
+  "ipc_path": "/dev/shm/forcevla-web/observation.npz",
+  "data_dir": "/home/user/forcevla-web/data",
+  "max_age_s": 0.75,
+  "max_skew_s": 0.2,
+  "max_source_age_s": 1.0,
+  "rpc_timeout_s": 15.0,
+  "disconnect_grace_s": 10.0,
+  "quota_mb": 4096,
+  "default_prompt": "Insert the Ethernet cable into the Ethernet port on the end face of the docking station.",
+  "image_shape": [
+    1488,
+    1920,
+    3
+  ],
+  "image_comparison_report": "/home/user/forcevla-web/artifacts/stability-20261014/image-contract/report.json",
+  "offline_ik": {
+    "enabled": true,
+    "worker_path": "/home/user/forcevla-web/native/build/offline_ik_worker",
+    "config_path": "/home/user/forcevla-web/config/ik.json",
+    "core_library_path": "/opt/kernelmind/apex/install/marvin_qp_controller/lib/marvin_qp_controller/libqp_controller_core.a",
+    "timeout_s": 5.0
+  },
+  "control_validation": {
+    "enabled": true,
+    "poll_period_s": 0.15,
+    "scope": "explicit stationary claim/hold/release only; no target or trajectory commands",
+    "gripper_speed_limit_rad_s": 0.03
+  },
+  "closed_loop": {
+    "enabled": true,
+    "integration_root": "/home/user/forcevla-web/robot_control",
+    "profile_path": "/home/user/forcevla-web/config/closed_loop_v1.json",
+    "qualification_path": "/home/user/forcevla-web/config/closed_loop_live_qualification.json",
+    "planner_enabled": true,
+    "config_root": "/home/user/forcevla-web/config"
+  },
+  "observation_period_s": 0.1,
+  "image_output_period_s": 0.09
+}

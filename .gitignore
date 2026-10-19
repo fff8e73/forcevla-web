@@ -147,3 +147,28 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# ForceVLA: local environments and Python caches
+.venv
+.ros-venv
+.control-venv
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local deployment, session keys, recordings and reports
+/config/local.json
+/data/
+/data-demo/
+/artifacts/
+/robot_control/runs
+/robot_control/artifacts
+session.key
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Generated native build outputs
+/native/build/
+/robot_control/build/

@@ -1,0 +1,2 @@
+# Install in a system-site-packages venv to retain the installed ROS/OpenCV ABI.
+av==16.0.1

@@ -1,0 +1,13 @@
+{
+  "name": "forcevla-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check forcevla_web/static/app.js && node --check forcevla_web/static/closed-loop.js && node --check forcevla_web/static/plots.js",
+    "test:browser": "node tests/browser.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.1",
+    "prettier": "3.6.2"
+  }
+}

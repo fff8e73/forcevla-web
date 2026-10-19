@@ -1,0 +1,8 @@
+# Overlay on system-site-packages Python 3.12 (ROS Jazzy, NumPy, SciPy, OpenCV, Pillow, PyYAML).
+av==18.1.0
+grpcio==1.84.0
+protobuf==7.36.2
+typing-extensions==4.16.0
+
+# Full MJCF geometric diagnostics (currently supplied by local system site packages).
+mujoco==3.10.0

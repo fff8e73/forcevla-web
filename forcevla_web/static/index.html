@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ForceVLA · 推理与真机闭环</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script type="module" src="/static/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="brand-icon">F</span>
+        <div>
+          <h1>ForceVLA <span>实时推理台</span></h1>
+          <p>双臂视觉 · 力觉 · 预测</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="tag purple">实时推理 / 真机闭环</span
+        ><span id="source-tag" class="tag">连接中</span
+        ><span id="connection" class="status">● 正在连接</span>
+      </div>
+    </header>
+    <main>
+      <div class="summary">
+        <div>
+          <span class="label">模型服务</span
+          ><strong id="model-status">检查中</strong><small id="model-service-name">未选择部署包</small>
+        </div>
+        <div>
+          <span class="label">观察输入</span
+          ><strong id="input-status">等待数据</strong
+          ><small id="input-age">四路图像 + 26 维状态</small>
+        </div>
+        <div>
+          <span class="label">推理会话</span
+          ><strong id="run-status">IDLE</strong
+          ><small id="run-count">尚未运行</small>
+        </div>
+        <div>
+          <span class="label">展示结果 RPC</span
+          ><strong id="rpc-value">— <em>ms</em></strong
+          ><small id="result-age">尚无结果</small>
+        </div>
+        <div>
+          <span class="label">稳态 P95</span
+          ><strong id="p95-value">— <em>ms</em></strong
+          ><small id="sample-count">首次请求单独统计</small>
+        </div>
+      </div>
+      <div id="banner" class="notice" role="status">正在读取输入状态…</div>
+      <section class="panel model-manager-panel" aria-labelledby="model-manager-title">
+        <div class="panel-heading">
+          <h2 id="model-manager-title">模型部署</h2>
+          <span id="model-manager-state" class="tag">未加载</span>
+        </div>
+        <div class="model-manager-row">
+          <label for="model-select">部署包</label>
+          <select id="model-select" aria-label="选择部署包"></select>
+          <button id="model-load" class="primary" type="button">加载模型</button>
+          <button id="model-stop" class="danger" type="button" disabled>停止模型</button>
+        </div>
+        <p id="model-manager-detail" class="subtle">选择已登记的 PhyAI 部署包。加载过程会启动独立模型服务并检查 RPC metadata。</p>
+        <div class="model-progress" aria-live="polite">
+          <div class="model-progress-track"><div id="model-progress-bar"></div></div>
+          <div class="model-progress-meta"><span id="model-progress-stage">等待加载</span><span id="model-progress-value">0% · 0s</span></div>
+        </div>
+        <pre id="model-log" class="model-log" aria-label="模型服务日志">等待模型日志…</pre>
+      </section>
+      <div class="top-grid">
+        <section class="panel cameras-panel">
+          <div class="panel-heading">
+            <h2><span class="dot"></span> 四路模型视野</h2>
+            <div class="segmented">
+              <button id="view-live" class="selected">实时输入</button
+              ><button id="view-snapshot" disabled>本次快照</button>
+            </div>
+          </div>
+          <div id="camera-grid" class="camera-grid"></div>
+          <div class="panel-footer">
+            <span id="camera-mode">实时输入 · 5 Hz 预览</span
+            ><span>RGB · 640 × 480 · 上下补边</span>
+          </div>
+        </section>
+        <aside class="panel task-panel">
+          <div class="panel-heading">
+            <h2>推理任务</h2>
+            <span class="tag">推理 / 执行</span>
+          </div>
+          <label for="prompt">任务描述 <span>与训练任务保持一致</span></label
+          ><textarea
+            id="prompt"
+            rows="4"
+            placeholder="输入当前权重支持的任务描述…"
+            maxlength="2000"
+          ></textarea>
+          <div class="seed-row">
+            <label for="seed">随机种子 <span>可选，用于复现</span></label
+            ><input
+              id="seed"
+              type="number"
+              min="0"
+              max="9007199254740991"
+              step="1"
+              placeholder="随机"
+            />
+          </div>
+          <div class="actions">
+            <button id="continuous" class="primary" disabled>开始连续</button>
+            <button id="execute20-stop" class="danger" disabled>
+              停止真机闭环
+            </button>
+            <button id="single" class="secondary" disabled>
+              仅单次推理 <span>↗</span>
+            </button>
+            <button id="stop" class="danger" disabled>停止推理</button>
+            <button
+              id="home"
+              class="secondary"
+              disabled
+              title="双臂回到HOME；完成后Input=None"
+            >
+              HOME · 双臂复位
+            </button>
+            <button
+              id="restart-gripper"
+              class="secondary"
+              disabled
+              title="向左右夹爪显式发送初始目标0"
+            >
+              夹爪回初始位
+            </button>
+          </div>
+          <p id="home-status" role="status" class="home-status">
+            HOME使用与原控制台相同的双臂复位。
+          </p>
+          <p id="restart-gripper-status" role="status" class="home-status">
+            发送左右初始位置目标0，并读取实际反馈。
+          </p>
+          <p id="operation-message" role="alert" class="operation-message"></p>
+          <div class="task-note">
+            <strong>开始连续：观察 → 推理 → 真机执行 → 重新观察</strong>
+            <p>
+              “开始连续”会控制真机，默认50轮、每轮20步。轮数和步数可在下方“分段闭环”调整；使用“停止真机闭环”结束。仅单次推理只展示预测，“停止推理”仅结束这类推理请求。
+            </p>
+            <p id="ik-service">离线检查初始化中</p>
+            <p id="ik-service-note">完整 m6_696 · 只计算，不下发动作</p>
+          </div>
+        </aside>
+      </div>
+      <div class="middle-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>预测 TCP 轨迹 <span class="subtle">base_link · m</span></h2>
+            <select id="projection" aria-label="轨迹投影">
+              <option value="iso">立体视图</option>
+              <option value="xy">XY 平面</option>
+              <option value="xz">XZ 平面</option>
+              <option value="yz">YZ 平面</option>
+            </select>
+          </div>
+          <div class="trajectory-wrap">
+            <canvas id="trajectory" aria-label="左右 TCP 预测轨迹"></canvas>
+            <div id="trajectory-empty" class="empty-overlay">
+              开始推理后，查看 50 步预测轨迹
+            </div>
+            <div class="legend">
+              <span class="left-color">● 左臂</span
+              ><span class="right-color">● 右臂</span><span>○ 观察时 TCP</span>
+            </div>
+          </div>
+          <div class="timeline">
+            <input
+              id="step"
+              type="range"
+              min="0"
+              max="49"
+              value="0"
+              aria-label="预测步骤"
+            /><span id="step-label">第 01 / 50 步 · t = 0.000 s</span>
+          </div>
+          <div id="prediction-details" class="prediction-details">
+            绝对 TCP / 夹爪目标 · 预测步长 1/30 s · 非实际执行进度
+          </div>
+          <div class="panel-footer">
+            <span id="prediction-id">尚无预测</span
+            ><span id="prediction-validity">离线 IK 未验证</span>
+          </div>
+        </section>
+        <section class="panel feedback-panel">
+          <div class="panel-heading">
+            <h2>实际反馈</h2>
+            <span class="subtle">位姿 m / rad</span>
+          </div>
+          <div class="feedback-columns">
+            <div>
+              <h3 class="left-color">左臂</h3>
+              <dl id="left-feedback"></dl>
+            </div>
+            <div>
+              <h3 class="right-color">右臂</h3>
+              <dl id="right-feedback"></dl>
+            </div>
+          </div>
+          <div class="force-note">
+            力 / 力矩单位 N / N·m；保留 flange_L/R 原始分量，物理语义待核验。
+          </div>
+          <h3 class="mini-title">预测夹爪行程 <span>无量纲</span></h3>
+          <canvas id="gripper-chart" aria-label="左右夹爪预测曲线"></canvas>
+          <div id="gripper-status" class="subtle chart-note">等待预测</div>
+        </section>
+      </div>
+      <section class="panel ik-panel">
+        <div class="panel-heading">
+          <h2>离线 IK 与轨迹检查</h2>
+          <button id="follow-latest" class="secondary">跟随最新预测</button>
+          <button id="view-checked" class="secondary" disabled>
+            查看最近已检查预测
+          </button>
+        </div>
+        <div class="ik-layout">
+          <div>
+            <canvas
+              id="joint-pose"
+              aria-label="观察与预测的双臂关节骨架"
+            ></canvas>
+            <p class="subtle ik-scope">
+              关节骨架示意，使用上方步滑块和投影视图。不是机械臂实际执行画面。
+            </p>
+          </div>
+          <div class="ik-result">
+            <h3 id="ik-summary">等待预测</h3>
+            <p id="ik-step-info"></p>
+            <p id="ik-reasons" role="status"></p>
+            <p id="ik-residual"></p>
+            <p id="ik-collision"></p>
+            <p id="ik-jumps"></p>
+            <table class="joint-table">
+              <thead>
+                <tr>
+                  <th>关节</th>
+                  <th>左臂</th>
+                  <th>右臂</th>
+                </tr>
+              </thead>
+              <tbody id="ik-joints"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ik-coverage">
+          检查范围：现有8对连杆/基座几何体及关节限位、跳变、速度。未覆盖夹爪、桌面及其他未建模对象；离散采样不是连续碰撞证明。通过检查也不是运动许可。
+        </div>
+        <div class="panel-footer">
+          <span id="ik-context"></span><span>实际执行尚未验收</span>
+        </div>
+      </section>
+      <section
+        class="panel control-validation-panel"
+        aria-labelledby="cv-title"
+      >
+        <div class="panel-heading">
+          <h2 id="cv-title">真实控制与保持链路验证</h2>
+          <span id="cv-state" class="tag">未启动</span>
+        </div>
+        <p class="cv-intro">
+          独立于影子推理。仅验证静止条件下的接管、保持和释放；不会发送模型预测或新的运动目标。
+        </p>
+        <div class="cv-grid">
+          <div>
+            <h3>1 · 只读检查</h3>
+            <p id="cv-precheck" role="status">尚未检查</p>
+            <pre id="cv-feedback">等待实时反馈</pre>
+            <button id="cv-check" class="secondary" disabled>
+              检查当前静止条件
+            </button>
+            <label class="cv-confirm"
+              ><input
+                type="checkbox"
+                id="cv-safety"
+              />我已确认工作区无人接触机械臂或夹爪、设备静止、物理急停可用，并允许切换
+              Input 为 None。</label
+            >
+            <p class="cv-note">
+              结束后保持 Input=None，不自动恢复遥操；需恢复时请在 Apex
+              控制台明确切换。
+            </p>
+          </div>
+          <div>
+            <h3>2 · 明确启动真实测试</h3>
+            <div class="cv-buttons">
+              <button id="cv-cycle" class="primary" disabled>
+                接管 → 保持 → 释放</button
+              ><button id="cv-lease" class="secondary" disabled>
+                验证租约超时保持</button
+              ><button id="cv-abort" class="danger" disabled>
+                中止并请求保持</button
+              ><button id="cv-release" class="secondary" disabled>
+                检查后释放本会话
+              </button>
+            </div>
+            <p id="cv-owner" class="cv-note"></p>
+            <p id="cv-message" role="alert" class="operation-message"></p>
+            <p class="cv-note">
+              “中止”不是物理急停。若保持无法确认，请使用现场急停并检查设备。
+            </p>
+            <button id="cv-moving" class="secondary" disabled>
+              有限运动 / 运动中停止验证 · 尚未启用
+            </button>
+          </div>
+        </div>
+        <div class="cv-run">
+          <strong id="cv-reason">尚未启动</strong>
+          <p id="cv-result"></p>
+          <div id="cv-events" class="cv-events" role="log"></div>
+        </div>
+        <div class="panel-footer">
+          <span>接口回执 ≠ 运动中停止证明</span
+          ><button id="cv-export" class="text-button" disabled>
+            下载验证报告
+          </button>
+        </div>
+      </section>
+      <section
+        class="panel closed-loop-panel"
+        id="closed-loop-panel"
+        aria-labelledby="cl-title"
+      >
+        <div class="panel-heading">
+          <h2 id="cl-title">分段闭环</h2>
+          <span id="cl-state" class="tag">未启动</span>
+        </div>
+        <p>
+          执行前 K 步 → 保持确认 → 新观察 → 重新推理。任务描述使用上方输入。
+        </p>
+        <div id="cl-mode-note" class="notice">正在读取闭环状态…</div>
+        <div class="cl-options">
+          <label
+            >运行方式<select id="cl-mode">
+              <option value="simulate">模拟验证</option>
+              <option value="planner">真机闭环（步数可调）</option>
+              <option value="live">原生节拍验证（1～3步）</option>
+            </select></label
+          >
+          <label
+            >每轮执行步数 K（1～50）<input
+              id="cl-k"
+              type="number"
+              min="1"
+              max="50"
+              value="20"
+              step="1"
+          /></label>
+          <label
+            >推理轮数上限（1～100）<input
+              id="cl-cycles"
+              type="number"
+              min="1"
+              max="100"
+              value="50"
+              step="1"
+          /></label>
+          <label
+            >总时长上限 / 秒<input
+              id="cl-duration"
+              type="number"
+              min="1"
+              max="600"
+              value="30"
+          /></label>
+        </div>
+        <p id="cl-profile" class="subtle"></p>
+        <p id="cl-owner" class="subtle"></p>
+        <div class="actions">
+          <button id="cl-start" class="primary" disabled>开始模拟闭环</button>
+          <button id="cl-stop" class="danger" disabled>停止并保持</button>
+        </div>
+        <p id="cl-message" class="operation-message" role="status"></p>
+        <div class="cl-metrics">
+          <div>
+            <span class="label">轮次</span><strong id="cl-progress">—</strong>
+          </div>
+          <div>
+            <span class="label">本轮执行进度</span
+            ><strong id="cl-executed">—</strong>
+          </div>
+          <div>
+            <span class="label">RPC / 准备</span
+            ><strong id="cl-timing">—</strong>
+          </div>
+          <div>
+            <span class="label">观察年龄</span><strong id="cl-age">—</strong>
+          </div>
+          <div>
+            <span class="label">保持 / 停止</span
+            ><strong id="cl-hold">—</strong>
+          </div>
+        </div>
+        <p id="cl-result" role="status">尚无闭环记录</p>
+        <div class="history-controls">
+          <select id="cl-history" aria-label="闭环历史">
+            <option value="">当前会话</option>
+          </select>
+          <button id="cl-refresh" class="secondary">刷新历史</button>
+          <button id="cl-export" class="secondary" disabled>
+            导出闭环记录
+          </button>
+        </div>
+        <pre id="cl-cycle-log" class="event-log">
+每轮观察、执行和保持结果将在这里显示</pre
+        >
+      </section>
+      <div class="bottom-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>推理耗时</h2>
+            <span class="subtle">RPC · ms</span>
+          </div>
+          <canvas id="latency-chart" aria-label="RPC耗时趋势"></canvas>
+          <div id="latency-note" class="panel-footer">
+            首次请求与稳态分开标记
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>会话记录</h2>
+            <button id="refresh-history" class="text-button">刷新历史</button>
+          </div>
+          <div class="history-controls">
+            <select id="history-run" aria-label="历史会话">
+              <option value="">当前会话</option></select
+            ><select id="history-prediction" aria-label="历史预测">
+              <option value="">最新预测</option></select
+            ><button id="export" class="secondary" disabled>导出</button>
+          </div>
+          <div id="event-log" class="event-log" role="log">尚无事件</div>
+        </section>
+      </div>
+      <footer>
+        ForceVLA Web
+        <span>实时采集 ≠ 30 Hz 模型推理 · 四路曝光同步尚未验证</span>
+      </footer>
+    </main>
+  </body>
+</html>
